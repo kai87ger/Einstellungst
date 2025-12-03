@@ -1,0 +1,766 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <title>Einstellungstest Kranfahrer</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    :root {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #f5f5f7;
+      color: #222;
+    }
+    body {
+      margin: 0;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      min-height: 100vh;
+      padding: 20px;
+    }
+    .container {
+      background: #ffffff;
+      max-width: 900px;
+      width: 100%;
+      padding: 24px 24px 32px;
+      border-radius: 16px;
+      box-shadow: 0 14px 30px rgba(0,0,0,0.08);
+    }
+    h1, h2, h3 {
+      margin-top: 0;
+    }
+    h1 {
+      text-align: center;
+      margin-bottom: 8px;
+    }
+    .subtitle {
+      text-align: center;
+      margin-bottom: 24px;
+      color: #555;
+    }
+    .screen {
+      display: none;
+    }
+    .screen.active {
+      display: block;
+    }
+    .question {
+      margin-bottom: 20px;
+      padding: 12px 14px;
+      border-radius: 10px;
+      background: #fafafa;
+      border: 1px solid #eee;
+    }
+    .question-title {
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+    .options label {
+      display: block;
+      margin-bottom: 6px;
+      cursor: pointer;
+    }
+    .btn-row {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      margin-top: 20px;
+      flex-wrap: wrap;
+    }
+    button {
+      border: none;
+      border-radius: 999px;
+      padding: 10px 18px;
+      font-size: 14px;
+      cursor: pointer;
+      background: #0070f3;
+      color: white;
+      font-weight: 500;
+      transition: transform 0.05s ease, box-shadow 0.05s ease, background 0.15s ease;
+    }
+    button.secondary {
+      background: #e5e7eb;
+      color: #111827;
+    }
+    button:active {
+      transform: translateY(1px);
+      box-shadow: none;
+    }
+    button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+    .tag {
+      display: inline-block;
+      font-size: 12px;
+      padding: 4px 8px;
+      border-radius: 999px;
+      background: #eff6ff;
+      color: #1d4ed8;
+      margin-bottom: 10px;
+    }
+    .result-box {
+      border-radius: 12px;
+      padding: 16px;
+      background: #f9fafb;
+      border: 1px solid #e5e7eb;
+      margin-bottom: 16px;
+    }
+    .result-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 6px;
+      font-size: 14px;
+    }
+    .result-row strong {
+      font-weight: 600;
+    }
+    .badge {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 600;
+      margin-left: 8px;
+    }
+    .badge-good {
+      background: #dcfce7;
+      color: #166534;
+    }
+    .badge-mid {
+      background: #fef9c3;
+      color: #854d0e;
+    }
+    .badge-bad {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+    .info {
+      font-size: 13px;
+      color: #6b7280;
+      margin-top: 8px;
+    }
+    .reaction-panel {
+      border-radius: 12px;
+      padding: 16px;
+      background: #f9fafb;
+      border: 1px solid #e5e7eb;
+      text-align: center;
+      margin-top: 8px;
+    }
+    .reaction-display {
+      margin-top: 12px;
+      padding: 30px 10px;
+      border-radius: 12px;
+      border: 2px dashed #d1d5db;
+      font-size: 18px;
+      font-weight: 600;
+      user-select: none;
+    }
+    .reaction-display.waiting {
+      background: #f9fafb;
+      color: #6b7280;
+    }
+    .reaction-display.ready {
+      background: #fef3c7;
+      color: #92400e;
+    }
+    .reaction-display.click {
+      background: #dcfce7;
+      color: #166534;
+      border-style: solid;
+    }
+    .reaction-stats {
+      margin-top: 10px;
+      font-size: 14px;
+    }
+    .pill {
+      display: inline-block;
+      padding: 2px 8px;
+      font-size: 11px;
+      border-radius: 999px;
+      background: #e5e7eb;
+      margin: 0 4px 4px 0;
+    }
+    @media (max-width: 600px) {
+      .container {
+        padding: 16px 14px 22px;
+      }
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <h1>Einstellungstest Kranfahrer</h1>
+  <div class="subtitle">
+    Online-Test mit automatischer Auswertung: Deutsch · Logik · Zahlenreihen · Reaktionszeit
+  </div>
+
+  <!-- Startbildschirm -->
+  <div class="screen active" id="screen-start">
+    <p>Dieser Test dient zur Eignungsbeurteilung von Bewerbenden für Tätigkeiten als Kranfahrer/in.</p>
+    <ul>
+      <li>Bearbeitungszeit: ca. 15–25 Minuten</li>
+      <li>Bitte arbeiten Sie konzentriert und ohne Hilfe.</li>
+      <li>Der Test besteht aus vier Modulen:</li>
+    </ul>
+    <div class="pill">Deutsch</div>
+    <div class="pill">Logisches Denken</div>
+    <div class="pill">Zahlenreihen</div>
+    <div class="pill">Reaktionszeit</div>
+
+    <div class="btn-row">
+      <button id="btn-start">Test starten</button>
+    </div>
+  </div>
+
+  <!-- Deutschtest -->
+  <div class="screen" id="screen-deutsch">
+    <span class="tag">Modul 1 · Deutsch</span>
+    <h2>Deutschtest</h2>
+    <p>Lesen Sie die Aufgaben sorgfältig und wählen Sie die jeweils passende Antwort aus.</p>
+
+    <div class="question">
+      <div class="question-title">1. Welcher Satz ist grammatikalisch richtig?</div>
+      <div class="options">
+        <label><input type="radio" name="d1" data-correct="false"> Der Kranführer habe die Last sicher angehoben.</label>
+        <label><input type="radio" name="d1" data-correct="true"> Der Kranführer hat die Last sicher angehoben.</label>
+        <label><input type="radio" name="d1" data-correct="false"> Der Kranführer hatt die Last sicher angehoben.</label>
+      </div>
+    </div>
+
+    <div class="question">
+      <div class="question-title">2. „Die Last darf <u>nicht</u> geschwenkt werden“. Was bedeutet das?</div>
+      <div class="options">
+        <label><input type="radio" name="d2" data-correct="true"> Die Last muss an ihrem Platz bleiben.</label>
+        <label><input type="radio" name="d2" data-correct="false"> Die Last soll möglichst schnell bewegt werden.</label>
+        <label><input type="radio" name="d2" data-correct="false"> Die Last darf nur nach links geschwenkt werden.</label>
+      </div>
+    </div>
+
+    <div class="question">
+      <div class="question-title">3. Welches Wort ist richtig geschrieben?</div>
+      <div class="options">
+        <label><input type="radio" name="d3" data-correct="false"> Stabiel</label>
+        <label><input type="radio" name="d3" data-correct="true"> Stabil</label>
+        <label><input type="radio" name="d3" data-correct="false"> Stabihl</label>
+      </div>
+    </div>
+
+    <div class="question">
+      <div class="question-title">
+        4. Sie bekommen die Anweisung: „Sperren Sie den Bereich um die Last sofort ab.“ Was tun Sie?
+      </div>
+      <div class="options">
+        <label><input type="radio" name="d4" data-correct="true"> Ich sichere den Gefahrenbereich, z.B. mit Absperrband oder Pylonen.</label>
+        <label><input type="radio" name="d4" data-correct="false"> Ich fahre die Last höher, damit niemand sie berührt.</label>
+        <label><input type="radio" name="d4" data-correct="false"> Ich warte, bis jemand anderes den Bereich absperrt.</label>
+      </div>
+    </div>
+
+    <div class="question">
+      <div class="question-title">5. Welcher Ausdruck passt in den Satz? „Die Last muss … befestigt sein.“</div>
+      <div class="options">
+        <label><input type="radio" name="d5" data-correct="false"> ungefähr</label>
+        <label><input type="radio" name="d5" data-correct="true"> sicher</label>
+        <label><input type="radio" name="d5" data-correct="false"> manchmal</label>
+      </div>
+    </div>
+
+    <div class="btn-row">
+      <button class="secondary" data-back="screen-start">Zurück</button>
+      <button data-next="screen-logik" data-validate="deutsch">Weiter zu Logik</button>
+    </div>
+  </div>
+
+  <!-- Logik -->
+  <div class="screen" id="screen-logik">
+    <span class="tag">Modul 2 · Logisches Denken</span>
+    <h2>Logiktest</h2>
+    <p>Wählen Sie die Antwort, die logisch am besten passt.</p>
+
+    <div class="question">
+      <div class="question-title">
+        1. Alle Krane auf dem Hof sind gelb. Maschine A steht auf dem Hof und ist ein Kran. Welche Aussage stimmt?
+      </div>
+      <div class="options">
+        <label><input type="radio" name="l1" data-correct="true"> Maschine A ist gelb.</label>
+        <label><input type="radio" name="l1" data-correct="false"> Maschine A ist nicht gelb.</label>
+        <label><input type="radio" name="l1" data-correct="false"> Man kann die Farbe nicht wissen.</label>
+      </div>
+    </div>
+
+    <div class="question">
+      <div class="question-title">
+        2. Wenn es stark windet, darf nicht gehoben werden. Heute ist es windstill. Was folgt daraus?
+      </div>
+      <div class="options">
+        <label><input type="radio" name="l2" data-correct="true"> Es ist <u>nicht</u wegen Wind verboten zu heben.</label>
+        <label><input type="radio" name="l2" data-correct="false"> Es darf auf keinen Fall gehoben werden.</label>
+        <label><input type="radio" name="l2" data-correct="false"> Es ist auf jeden Fall gefährlich zu heben.</label>
+      </div>
+    </div>
+
+    <div class="question">
+      <div class="question-title">3. Zahlenfolge: 2 · 4 · 8 · 16 · ?</div>
+      <div class="options">
+        <label><input type="radio" name="l3" data-correct="false"> 20</label>
+        <label><input type="radio" name="l3" data-correct="true"> 32</label>
+        <label><input type="radio" name="l3" data-correct="false"> 30</label>
+      </div>
+    </div>
+
+    <div class="question">
+      <div class="question-title">
+        4. Drei unterschiedliche Lasten wiegen 2 t, 4 t und 6 t. Es dürfen maximal 8 t gleichzeitig angehoben werden. Welche Kombination ist erlaubt?
+      </div>
+      <div class="options">
+        <label><input type="radio" name="l4" data-correct="true"> 2 t + 6 t</label>
+        <label><input type="radio" name="l4" data-correct="false"> 4 t + 6 t</label>
+        <label><input type="radio" name="l4" data-correct="false"> 2 t + 4 t + 6 t</label>
+      </div>
+    </div>
+
+    <div class="question">
+      <div class="question-title">
+        5. Wenn A vor B kommt und B vor C kommt, welche Reihenfolge ist möglich?
+      </div>
+      <div class="options">
+        <label><input type="radio" name="l5" data-correct="false"> C – B – A</label>
+        <label><input type="radio" name="l5" data-correct="true"> A – B – C</label>
+        <label><input type="radio" name="l5" data-correct="false"> B – C – A</label>
+      </div>
+    </div>
+
+    <div class="btn-row">
+      <button class="secondary" data-back="screen-deutsch">Zurück</button>
+      <button data-next="screen-zahlen" data-validate="logik">Weiter zu Zahlenreihen</button>
+    </div>
+  </div>
+
+  <!-- Zahlenreihen -->
+  <div class="screen" id="screen-zahlen">
+    <span class="tag">Modul 3 · Zahlenreihen</span>
+    <h2>Zahlenreihen</h2>
+    <p>Setzen Sie die Reihen logisch fort.</p>
+
+    <div class="question">
+      <div class="question-title">1. 5 · 10 · 15 · 20 · ?</div>
+      <div class="options">
+        <label><input type="radio" name="z1" data-correct="true"> 25</label>
+        <label><input type="radio" name="z1" data-correct="false"> 30</label>
+        <label><input type="radio" name="z1" data-correct="false"> 35</label>
+      </div>
+    </div>
+
+    <div class="question">
+      <div class="question-title">2. 3 · 6 · 12 · 24 · ?</div>
+      <div class="options">
+        <label><input type="radio" name="z2" data-correct="false"> 30</label>
+        <label><input type="radio" name="z2" data-correct="true"> 48</label>
+        <label><input type="radio" name="z2" data-correct="false"> 60</label>
+      </div>
+    </div>
+
+    <div class="question">
+      <div class="question-title">3. 100 · 95 · 90 · 85 · ?</div>
+      <div class="options">
+        <label><input type="radio" name="z3" data-correct="true"> 80</label>
+        <label><input type="radio" name="z3" data-correct="false"> 75</label>
+        <label><input type="radio" name="z3" data-correct="false"> 70</label>
+      </div>
+    </div>
+
+    <div class="question">
+      <div class="question-title">4. 4 · 9 · 14 · 19 · ?</div>
+      <div class="options">
+        <label><input type="radio" name="z4" data-correct="false"> 23</label>
+        <label><input type="radio" name="z4" data-correct="true"> 24</label>
+        <label><input type="radio" name="z4" data-correct="false"> 25</label>
+      </div>
+    </div>
+
+    <div class="question">
+      <div class="question-title">5. 2 · 5 · 11 · 23 · ?</div>
+      <div class="options">
+        <label><input type="radio" name="z5" data-correct="false"> 34</label>
+        <label><input type="radio" name="z5" data-correct="true"> 47</label>
+        <label><input type="radio" name="z5" data-correct="false"> 50</label>
+      </div>
+    </div>
+
+    <div class="btn-row">
+      <button class="secondary" data-back="screen-logik">Zurück</button>
+      <button data-next="screen-reaktion" data-validate="zahlen">Weiter zu Reaktionszeit</button>
+    </div>
+  </div>
+
+  <!-- Reaktionszeit -->
+  <div class="screen" id="screen-reaktion">
+    <span class="tag">Modul 4 · Reaktionszeit</span>
+    <h2>Reaktionszeit & Aufmerksamkeit</h2>
+    <p>
+      Es werden <strong>5 Runden</strong> gemessen. Klicken Sie so schnell wie möglich,
+      sobald das Feld grün wird.
+    </p>
+
+    <div class="reaction-panel">
+      <div id="reaction-round">Runde 1 von 5</div>
+      <div id="reaction-display" class="reaction-display waiting">
+        Klicken Sie auf „Start“, um die Runde zu beginnen.
+      </div>
+      <div class="btn-row" style="justify-content:center; margin-top:14px;">
+        <button id="btn-reaction-start">Start</button>
+        <button id="btn-reaction-click" disabled>Jetzt klicken</button>
+      </div>
+      <div class="reaction-stats" id="reaction-stats"></div>
+      <div class="info">
+        Hinweis: Zu frühes Klicken (bevor das Feld grün wird) zählt als Fehlversuch.
+      </div>
+    </div>
+
+    <div class="btn-row">
+      <button class="secondary" data-back="screen-zahlen">Zurück</button>
+      <button id="btn-finish" disabled>Test auswerten</button>
+    </div>
+  </div>
+
+  <!-- Ergebnis -->
+  <div class="screen" id="screen-result">
+    <span class="tag">Ergebnis</span>
+    <h2>Testergebnis</h2>
+
+    <div class="result-box" id="result-summary"></div>
+    <div class="result-box" id="result-details"></div>
+
+    <p class="info">
+      Hinweis: Dieser Test ersetzt keine gesetzlich vorgeschriebenen Untersuchungen oder Schulungen,
+      kann aber als zusätzliches Eignungsinstrument eingesetzt werden.
+    </p>
+
+    <div class="btn-row">
+      <button id="btn-restart" class="secondary">Test neu starten</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  // --- Navigation / allgemeine Logik ---
+  const screens = document.querySelectorAll('.screen');
+  function showScreen(id) {
+    screens.forEach(s => s.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+  }
+
+  document.getElementById('btn-start').addEventListener('click', () => {
+    showScreen('screen-deutsch');
+  });
+
+  document.querySelectorAll('[data-back]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      showScreen(btn.getAttribute('data-back'));
+    });
+  });
+
+  // Punktestände & Maximalwerte
+  const maxPoints = {
+    deutsch: 5,
+    logik: 5,
+    zahlen: 5,
+    reaktion: 20
+  };
+
+  const scores = {
+    deutsch: 0,
+    logik: 0,
+    zahlen: 0,
+    reaktion: 0,
+    avgReactionMs: null
+  };
+
+  function evaluateRadioGroup(prefixName) {
+    let score = 0;
+    const correctInputs = document.querySelectorAll(`input[name^="${prefixName}"][data-correct="true"]`);
+    correctInputs.forEach(input => {
+      if (input.checked) score++;
+    });
+    return score;
+  }
+
+  function allAnswered(prefixName, totalQuestions) {
+    for (let i = 1; i <= totalQuestions; i++) {
+      const group = document.querySelectorAll(`input[name="${prefixName}${i}"]`);
+      let anyChecked = false;
+      group.forEach(inp => { if (inp.checked) anyChecked = true; });
+      if (!anyChecked) return false;
+    }
+    return true;
+  }
+
+  document.querySelectorAll('[data-next]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const nextId = btn.getAttribute('data-next');
+      const validate = btn.getAttribute('data-validate');
+
+      if (validate === 'deutsch') {
+        if (!allAnswered('d', 5)) {
+          alert('Bitte beantworten Sie alle Fragen im Deutschtest.');
+          return;
+        }
+        scores.deutsch = evaluateRadioGroup('d');
+      }
+
+      if (validate === 'logik') {
+        if (!allAnswered('l', 5)) {
+          alert('Bitte beantworten Sie alle Fragen im Logiktest.');
+          return;
+        }
+        scores.logik = evaluateRadioGroup('l');
+      }
+
+      if (validate === 'zahlen') {
+        if (!allAnswered('z', 5)) {
+          alert('Bitte beantworten Sie alle Fragen im Modul Zahlenreihen.');
+          return;
+        }
+        scores.zahlen = evaluateRadioGroup('z');
+      }
+
+      showScreen(nextId);
+    });
+  });
+
+  // --- Reaktionszeit-Modul ---
+  const reactionDisplay = document.getElementById('reaction-display');
+  const reactionRoundLabel = document.getElementById('reaction-round');
+  const reactionStats = document.getElementById('reaction-stats');
+  const btnReactionStart = document.getElementById('btn-reaction-start');
+  const btnReactionClick = document.getElementById('btn-reaction-click');
+  const btnFinish = document.getElementById('btn-finish');
+
+  const reactionConfig = {
+    totalRounds: 5,
+    currentRound: 1,
+    waitingForGreen: false,
+    canClick: false,
+    startTime: null,
+    times: [],
+    timeoutId: null
+  };
+
+  function resetReactionModule() {
+    reactionConfig.currentRound = 1;
+    reactionConfig.waitingForGreen = false;
+    reactionConfig.canClick = false;
+    reactionConfig.startTime = null;
+    reactionConfig.times = [];
+    if (reactionConfig.timeoutId) {
+      clearTimeout(reactionConfig.timeoutId);
+      reactionConfig.timeoutId = null;
+    }
+    btnReactionClick.disabled = true;
+    btnReactionStart.disabled = false;
+    btnFinish.disabled = true;
+    updateReactionUIWaiting();
+    updateReactionLabels();
+  }
+
+  function updateReactionLabels() {
+    reactionRoundLabel.textContent = `Runde ${reactionConfig.currentRound} von ${reactionConfig.totalRounds}`;
+    if (reactionConfig.times.length > 0) {
+      const avg = Math.round(reactionConfig.times.reduce((a,b)=>a+b, 0) / reactionConfig.times.length);
+      reactionStats.textContent = `Durchschnitt bisher: ${avg} ms · Einzelwerte: ${reactionConfig.times.map(t => t + ' ms').join(' · ')}`;
+    } else {
+      reactionStats.textContent = '';
+    }
+  }
+
+  function updateReactionUIWaiting() {
+    reactionDisplay.classList.remove('ready', 'click');
+    reactionDisplay.classList.add('waiting');
+    reactionDisplay.textContent = 'Klicken Sie auf „Start“, um die Runde zu beginnen.';
+  }
+
+  function updateReactionUIReady() {
+    reactionDisplay.classList.remove('waiting', 'click');
+    reactionDisplay.classList.add('ready');
+    reactionDisplay.textContent = 'Warten... Feld wird gleich grün.';
+  }
+
+  function updateReactionUIClick() {
+    reactionDisplay.classList.remove('waiting', 'ready');
+    reactionDisplay.classList.add('click');
+    reactionDisplay.textContent = 'JETZT KLICKEN!';
+  }
+
+  btnReactionStart.addEventListener('click', () => {
+    if (reactionConfig.currentRound > reactionConfig.totalRounds) return;
+
+    reactionConfig.waitingForGreen = true;
+    reactionConfig.canClick = false;
+    btnReactionStart.disabled = true;
+    btnReactionClick.disabled = false;
+    updateReactionUIReady();
+
+    const delay = 800 + Math.random() * 2200; // 0.8–3 Sekunden
+    reactionConfig.timeoutId = setTimeout(() => {
+      reactionConfig.waitingForGreen = false;
+      reactionConfig.canClick = true;
+      reactionConfig.startTime = performance.now();
+      updateReactionUIClick();
+    }, delay);
+  });
+
+  btnReactionClick.addEventListener('click', () => {
+    // Zu früh geklickt
+    if (reactionConfig.waitingForGreen) {
+      clearTimeout(reactionConfig.timeoutId);
+      reactionConfig.timeoutId = null;
+      reactionDisplay.classList.remove('ready', 'click');
+      reactionDisplay.classList.add('waiting');
+      reactionDisplay.textContent = 'Zu früh geklickt! Diese Runde wird als Fehlversuch gewertet.';
+      reactionConfig.times.push(800); // Strafwert
+    } else if (reactionConfig.canClick) {
+      const endTime = performance.now();
+      const reactionTime = Math.round(endTime - reactionConfig.startTime);
+      reactionConfig.times.push(reactionTime);
+      reactionDisplay.classList.remove('waiting', 'ready', 'click');
+      reactionDisplay.classList.add('waiting');
+      reactionDisplay.textContent = `Reaktionszeit: ${reactionTime} ms`;
+    } else {
+      return;
+    }
+
+    reactionConfig.currentRound++;
+    reactionConfig.waitingForGreen = false;
+    reactionConfig.canClick = false;
+    btnReactionClick.disabled = true;
+    btnReactionStart.disabled = false;
+    updateReactionLabels();
+
+    if (reactionConfig.currentRound > reactionConfig.totalRounds) {
+      btnReactionStart.disabled = true;
+      btnReactionClick.disabled = true;
+      btnFinish.disabled = false;
+      reactionDisplay.textContent = 'Reaktionsmessung abgeschlossen. Sie können den Test jetzt auswerten.';
+      if (reactionConfig.times.length > 0) {
+        const avg = Math.round(reactionConfig.times.reduce((a,b)=>a+b, 0) / reactionConfig.times.length);
+        reactionStats.textContent = `Durchschnittliche Reaktionszeit: ${avg} ms · Einzelwerte: ${reactionConfig.times.map(t => t + ' ms').join(' · ')}`;
+      }
+    }
+  });
+
+  btnFinish.addEventListener('click', () => {
+    if (reactionConfig.times.length === 0) {
+      alert('Bitte führen Sie die Reaktionsmessung durch.');
+      return;
+    }
+    const avg = Math.round(reactionConfig.times.reduce((a,b)=>a+b, 0) / reactionConfig.times.length);
+    scores.avgReactionMs = avg;
+    scores.reaktion = mapReactionToPoints(avg);
+    showResult();
+    showScreen('screen-result');
+  });
+
+  function mapReactionToPoints(avgMs) {
+    // einfache Abstufung: je schneller, desto mehr Punkte (max 20)
+    if (avgMs <= 250) return 20;
+    if (avgMs <= 350) return 17;
+    if (avgMs <= 450) return 14;
+    if (avgMs <= 550) return 11;
+    if (avgMs <= 700) return 8;
+    return 5;
+  }
+
+  // --- Gesamtauswertung ---
+  function showResult() {
+    const totalScore = scores.deutsch + scores.logik + scores.zahlen + scores.reaktion;
+    const maxTotal = maxPoints.deutsch + maxPoints.logik + maxPoints.zahlen + maxPoints.reaktion;
+    const percent = Math.round((totalScore / maxTotal) * 100);
+
+    let suitability = '';
+    let badgeClass = '';
+
+    // Empfehlung: Kombination aus Gesamtpunktzahl und Reaktionszeit
+    if (percent >= 75 && scores.avgReactionMs !== null && scores.avgReactionMs <= 450) {
+      suitability = 'geeignet';
+      badgeClass = 'badge-good';
+    } else if (percent >= 55) {
+      suitability = 'bedingt geeignet';
+      badgeClass = 'badge-mid';
+    } else {
+      suitability = 'nicht geeignet';
+      badgeClass = 'badge-bad';
+    }
+
+    const resultSummary = document.getElementById('result-summary');
+    resultSummary.innerHTML = `
+      <div class="result-row">
+        <div><strong>Gesamtpunktzahl</strong></div>
+        <div><strong>${totalScore} / ${maxTotal} Punkte</strong></div>
+      </div>
+      <div class="result-row">
+        <div>Gesamtleistung</div>
+        <div>${percent} %</div>
+      </div>
+      <div class="result-row">
+        <div>Eignung</div>
+        <div>${suitability.toUpperCase()}
+          <span class="badge ${badgeClass}">
+            ${suitability === 'geeignet' ? 'Empfehlung' :
+               suitability === 'bedingt geeignet' ? 'kritisch prüfen' : 'nicht empfohlen'}
+          </span>
+        </div>
+      </div>
+    `;
+
+    const resultDetails = document.getElementById('result-details');
+    resultDetails.innerHTML = `
+      <h3>Modulübersicht</h3>
+      <div class="result-row">
+        <div>Deutsch</div>
+        <div>${scores.deutsch} / ${maxPoints.deutsch}</div>
+      </div>
+      <div class="result-row">
+        <div>Logisches Denken</div>
+        <div>${scores.logik} / ${maxPoints.logik}</div>
+      </div>
+      <div class="result-row">
+        <div>Zahlenreihen</div>
+        <div>${scores.zahlen} / ${maxPoints.zahlen}</div>
+      </div>
+      <div class="result-row">
+        <div>Reaktionszeit (Punkte)</div>
+        <div>${scores.reaktion} / ${maxPoints.reaktion}</div>
+      </div>
+      <div class="result-row">
+        <div>Ø Reaktionszeit (ms)</div>
+        <div>${scores.avgReactionMs != null ? scores.avgReactionMs + ' ms' : '-'}</div>
+      </div>
+      <p class="info">
+        Interpretation (Vorschlag):<br>
+        – Deutsch & Logik &gt;= 70 %: gute Voraussetzung für das Verständnis von Arbeitsanweisungen.<br>
+        – Zahlenreihen &gt;= 60 %: solide numerische Basis (z. B. für Lasttabellen).<br>
+        – Ø Reaktionszeit ≤ 450 ms: gute Aufmerksamkeit und Reaktionsfähigkeit.
+      </p>
+    `;
+  }
+
+  // --- Restart-Funktion ---
+  document.getElementById('btn-restart').addEventListener('click', () => {
+    // Antworten zurücksetzen
+    document.querySelectorAll('input[type="radio"]').forEach(inp => inp.checked = false);
+    scores.deutsch = 0;
+    scores.logik = 0;
+    scores.zahlen = 0;
+    scores.reaktion = 0;
+    scores.avgReactionMs = null;
+    resetReactionModule();
+    showScreen('screen-start');
+  });
+
+  // Beim Laden Reaktionsmodul initialisieren
+  resetReactionModule();
+</script>
+</body>
+</html>
